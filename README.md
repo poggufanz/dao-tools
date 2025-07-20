@@ -61,19 +61,4 @@ To prevent vote manipulation from multi-wallets, we support:
 
 ---
 
-## 👥 Contributing
-
-We welcome collaboration! Feel free to:
-- Fork & PR
-- Submit issues or ideas
-- Reach out via [Dorahacks profile/team page](#)
-
----
-
-## 📄 License
-
-MIT License
-
----
-
 > Built for WCHL25 • Made by builders who care about **fair governance**
