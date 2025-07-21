@@ -1,4 +1,4 @@
-// File: /home/poggufanz/whcl/dao-tools/src/dao-tools-frontend/app/layout.tsx
+// File: C:\Data\Code\WHCL\dao-tools\src\dao-tools-frontend\app\layout.tsx
 import * as entry from '../../../app/layout.js'
 import type { ResolvingMetadata, ResolvingViewport } from 'next/dist/lib/metadata/types/metadata-interface.js'
 

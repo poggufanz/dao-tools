@@ -1,4 +1,4 @@
-// File: /home/poggufanz/whcl/dao-tools/src/dao-tools-frontend/app/communities/page.tsx
+// File: C:\Data\Code\WHCL\dao-tools\src\dao-tools-frontend\app\communities\page.tsx
 import * as entry from '../../../../app/communities/page.js'
 import type { ResolvingMetadata, ResolvingViewport } from 'next/dist/lib/metadata/types/metadata-interface.js'
 
