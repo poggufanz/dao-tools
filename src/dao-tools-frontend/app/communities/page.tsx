@@ -185,30 +185,6 @@ export default function CommunitiesPage() {
         </div>
       </header>
       <div className="container mx-auto px-4 py-8">
-        {communities.map((community) => (
-          <div key={community.id} className="border p-4 rounded-lg shadow">
-            <div className="flex justify-between items-center mb-2">
-              <h2 className="text-lg font-bold">{community.name}</h2>
-              {community.joined ? (
-                <Link href={`/community/${community.id}`} className="text-blue-600">View</Link>
-              ) : (
-                <button className="bg-blue-500 text-white px-3 py-1 rounded">Join</button>
-              )}
-            </div>
-
-            {(community.proposals || []).length > 0 ? (
-              <ul className="ml-4 list-disc text-sm text-gray-600">
-                {community.proposals.map((proposal, idx) => (
-                  <li key={idx}>{proposal.title}</li>
-                ))}
-              </ul>
-            ) : (
-              <p className="text-gray-400 text-sm italic ml-4">Belum ada proposal</p>
-            )}
-          </div>
-        ))}
-      </div>
-      <div className="container mx-auto px-4 py-8">
         {/* Page Header */}
         <div className="flex flex-col md:flex-row md:items-center justify-between mb-8">
           <div>
