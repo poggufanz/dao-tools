@@ -1,0 +1,7 @@
+{
+  "/dashboard/page": "app/dashboard/page.js",
+  "/create-vote/page": "app/create-vote/page.js",
+  "/page": "app/page.js",
+  "/admin/page": "app/admin/page.js",
+  "/communities/page": "app/communities/page.js"
+}
