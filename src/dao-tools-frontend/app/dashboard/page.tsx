@@ -204,7 +204,38 @@ export default function Dashboard() {
           </div>
         </div>
       </header>
+      <div className="container mx-auto px-4 py-8">{/* Your Communities Section */}
+        <div className="mt-5">
+          <h2 className="text-xl font-semibold mb-4">Your Communities</h2>
+          <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-3">
+            {[
+              { name: "DAO Hackers", slug: "dao-hackers" },
+              { name: "Coding Club", slug: "coding-club" },
+              { name: "Web3 Builders", slug: "web3-builders" },
+            ].map((comm) => (
+              <Card key={comm.slug}>
+                <CardHeader>
+                  <CardTitle>{comm.name}</CardTitle>
+                </CardHeader>
+                <CardContent>
+                  <Link href={`/community/${comm.slug}`}>
+                    <Button variant="default">View</Button>
+                  </Link>
+                </CardContent>
+              </Card>
+            ))}
+          </div>
 
+          <div className="mt-6 flex gap-4">
+            <Link href="/communities">
+              <Button variant="outline">Join More Communities</Button>
+            </Link>
+            <Link href="/create-community">
+              <Button>Create New Community</Button>
+            </Link>
+          </div>
+        </div>
+      </div>
       <div className="container mx-auto px-4 py-8">
         <div className="grid lg:grid-cols-4 gap-8">
           {/* Main Content */}
