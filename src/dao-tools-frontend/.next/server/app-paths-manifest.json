@@ -1,9 +1,7 @@
 {
-  "/page": "app/page.js",
+  "/dashboard/page": "app/dashboard/page.js",
   "/communities/page": "app/communities/page.js",
   "/community/[id]/page": "app/community/[id]/page.js",
-  "/dashboard/page": "app/dashboard/page.js",
-  "/vote/[id]/page": "app/vote/[id]/page.js",
-  "/create-proposal/page": "app/create-proposal/page.js",
-  "/admin/page": "app/admin/page.js"
+  "/chat/page": "app/chat/page.js",
+  "/page": "app/page.js"
 }
