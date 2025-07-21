@@ -6,7 +6,7 @@ import { Badge } from "@/components/ui/badge"
 import { Progress } from "@/components/ui/progress"
 import { Avatar, AvatarFallback } from "@/components/ui/avatar"
 import { Separator } from "@/components/ui/separator"
-import { CheckCircle, XCircle, MinusCircle, Clock, User, Shield, Star } from "lucide-react"
+import { CheckCircle, XCircle, MinusCircle, Clock, User, Shield, Star, Vote, Users, TrendingUp } from "lucide-react"
 import Link from "next/link"
 import { useState } from "react"
 
@@ -36,6 +36,45 @@ const mockProposals = [
     votes: { yes: 2340, no: 890, abstain: 156 },
     totalVotes: 3386,
     userVote: "yes",
+  },
+]
+
+// Mock active votes data
+const mockActiveVotes = [
+  {
+    id: "vote-1",
+    title: "Community Leadership Election 2024",
+    description: "Election for the next community leader who will guide our DAO's strategic direction.",
+    community: "DeFi Builders",
+    type: "single-choice",
+    deadline: new Date(Date.now() + 5 * 24 * 60 * 60 * 1000),
+    totalVotes: 1247,
+    hasVoted: false,
+    topCandidate: "Alice Johnson",
+    leadingPercentage: 39.1,
+  },
+  {
+    id: "vote-2",
+    title: "Treasury Allocation Proposal",
+    description: "Decide how to allocate 500,000 USDC from the community treasury.",
+    community: "Climate Action DAO",
+    type: "yes-no",
+    deadline: new Date(Date.now() + 3 * 24 * 60 * 60 * 1000),
+    totalVotes: 892,
+    hasVoted: true,
+    yesPercentage: 71.5,
+  },
+  {
+    id: "vote-3",
+    title: "New Partnership Approval",
+    description: "Vote on strategic partnership with EcoTech Solutions for carbon offset projects.",
+    community: "University DAO",
+    type: "multiple-choice",
+    deadline: new Date(Date.now() + 1 * 24 * 60 * 60 * 1000),
+    totalVotes: 234,
+    hasVoted: false,
+    topOption: "Approve with conditions",
+    leadingPercentage: 45.2,
   },
 ]
 
@@ -98,6 +137,36 @@ export default function Dashboard() {
     }
   }
 
+  const getVoteTypeLabel = (type: string) => {
+    switch (type) {
+      case "single-choice":
+        return "Single Choice"
+      case "ranked-choice":
+        return "Ranked Choice"
+      case "yes-no":
+        return "Yes/No"
+      case "multiple-choice":
+        return "Multiple Choice"
+      default:
+        return "Vote"
+    }
+  }
+
+  const getVoteTypeColor = (type: string) => {
+    switch (type) {
+      case "single-choice":
+        return "bg-blue-100 text-blue-800 dark:bg-blue-900/20 dark:text-blue-400"
+      case "ranked-choice":
+        return "bg-purple-100 text-purple-800 dark:bg-purple-900/20 dark:text-purple-400"
+      case "yes-no":
+        return "bg-green-100 text-green-800 dark:bg-green-900/20 dark:text-green-400"
+      case "multiple-choice":
+        return "bg-orange-100 text-orange-800 dark:bg-orange-900/20 dark:text-orange-400"
+      default:
+        return "bg-gray-100 text-gray-800 dark:bg-gray-900/20 dark:text-gray-400"
+    }
+  }
+
   return (
     <div className="min-h-screen bg-background">
       {/* Header */}
@@ -113,8 +182,14 @@ export default function Dashboard() {
             <Link href="/dashboard" className="text-foreground font-medium">
               Dashboard
             </Link>
+            <Link href="/communities" className="text-muted-foreground hover:text-foreground">
+              Communities
+            </Link>
             <Link href="/create-proposal" className="text-muted-foreground hover:text-foreground">
               Create Proposal
+            </Link>
+            <Link href="/create-vote" className="text-muted-foreground hover:text-foreground">
+              Create Vote
             </Link>
             <Link href="/admin" className="text-muted-foreground hover:text-foreground">
               Admin
@@ -134,8 +209,104 @@ export default function Dashboard() {
         <div className="grid lg:grid-cols-4 gap-8">
           {/* Main Content */}
           <div className="lg:col-span-3">
+            {/* Active Votes Section */}
+            <div className="mb-8">
+              <div className="flex items-center justify-between mb-6">
+                <h2 className="text-2xl font-bold">Active Votes</h2>
+                <Button asChild>
+                  <Link href="/create-vote">Create Vote</Link>
+                </Button>
+              </div>
+
+              <div className="space-y-4">
+                {mockActiveVotes.map((vote) => (
+                  <Card key={vote.id} className="w-full">
+                    <CardHeader>
+                      <div className="flex items-start justify-between">
+                        <div className="flex-1">
+                          <div className="flex items-center space-x-2 mb-2">
+                            <CardTitle className="text-lg">{vote.title}</CardTitle>
+                            <Badge className={getVoteTypeColor(vote.type)}>{getVoteTypeLabel(vote.type)}</Badge>
+                            {vote.hasVoted && (
+                              <Badge
+                                variant="secondary"
+                                className="bg-green-100 text-green-800 dark:bg-green-900/20 dark:text-green-400"
+                              >
+                                Voted
+                              </Badge>
+                            )}
+                          </div>
+                          <CardDescription className="text-base mb-3">{vote.description}</CardDescription>
+                          <div className="flex items-center gap-4 text-sm text-muted-foreground">
+                            <span>{vote.community}</span>
+                            <div className="flex items-center gap-1">
+                              <Clock className="w-4 h-4" />
+                              {formatTimeRemaining(vote.deadline)}
+                            </div>
+                            <div className="flex items-center gap-1">
+                              <Users className="w-4 h-4" />
+                              {vote.totalVotes} votes
+                            </div>
+                          </div>
+                        </div>
+                      </div>
+                    </CardHeader>
+                    <CardContent>
+                      {/* Vote Results Preview */}
+                      <div className="space-y-3 mb-4">
+                        {vote.type === "single-choice" && (
+                          <div className="space-y-2">
+                            <div className="flex justify-between text-sm">
+                              <span>Leading: {vote.topCandidate}</span>
+                              <span>{vote.leadingPercentage}%</span>
+                            </div>
+                            <Progress value={vote.leadingPercentage} className="h-2" />
+                          </div>
+                        )}
+
+                        {vote.type === "yes-no" && (
+                          <div className="space-y-2">
+                            <div className="flex justify-between text-sm">
+                              <span>Yes votes</span>
+                              <span>{vote.yesPercentage}%</span>
+                            </div>
+                            <Progress value={vote.yesPercentage} className="h-2" />
+                          </div>
+                        )}
+
+                        {vote.type === "multiple-choice" && (
+                          <div className="space-y-2">
+                            <div className="flex justify-between text-sm">
+                              <span>Leading: {vote.topOption}</span>
+                              <span>{vote.leadingPercentage}%</span>
+                            </div>
+                            <Progress value={vote.leadingPercentage} className="h-2" />
+                          </div>
+                        )}
+                      </div>
+
+                      {/* Action Buttons */}
+                      <div className="flex space-x-2">
+                        <Button asChild className="flex-1">
+                          <Link href={`/vote/${vote.id}`}>
+                            <Vote className="w-4 h-4 mr-2" />
+                            {vote.hasVoted ? "View Results" : "Vote Now"}
+                          </Link>
+                        </Button>
+                        <Button variant="outline" size="sm">
+                          <TrendingUp className="w-4 h-4 mr-1" />
+                          Details
+                        </Button>
+                      </div>
+                    </CardContent>
+                  </Card>
+                ))}
+              </div>
+            </div>
+
+            {/* Traditional Proposals Section */}
             <div className="flex items-center justify-between mb-6">
-              <h1 className="text-3xl font-bold">Active Proposals</h1>
+              <h2 className="text-2xl font-bold">Active Proposals</h2>
               <Button asChild>
                 <Link href="/create-proposal">Create Proposal</Link>
               </Button>

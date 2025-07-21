@@ -2,7 +2,7 @@
 @tailwind components;
 @tailwind utilities;
 
-@config "../tailwind.config.ts"; /* Pastikan path-nya benar */
+@config "../tailwind.config.ts"; 
 
 @layer base {
   :root {
@@ -49,13 +49,19 @@
     --input: 217.2 32.6% 17.5%;
     --ring: 224.3 76.3% 94.1%;
   }
+}
 
+@layer base {
   * {
-    @apply border-border transition-colors duration-200;
+    @apply border-border;
   }
-
   body {
     @apply bg-background text-foreground transition-colors duration-300;
+  }
+
+  /* Smooth transitions for theme changes */
+  * {
+    @apply transition-colors duration-200;
   }
 
   /* Custom scrollbar for dark mode */
@@ -76,25 +82,40 @@
   }
 }
 
-@layer components {
-  /* Custom styles for voting buttons in dark mode */
-  .dark .vote-button-yes {
-    @apply bg-green-900/20 border-green-700 text-green-400 hover:bg-green-900/30;
-  }
+/* Enhanced dark mode styles for better contrast */
+.dark {
+  /* Better contrast for cards in dark mode */
+  --card: 222.2 84% 6%;
+  --popover: 222.2 84% 6%;
 
-  .dark .vote-button-no {
-    @apply bg-red-900/20 border-red-700 text-red-400 hover:bg-red-900/30;
-  }
+  /* Improved muted colors for dark mode */
+  --muted: 217.2 32.6% 15%;
+  --accent: 217.2 32.6% 15%;
+  --secondary: 217.2 32.6% 15%;
 
-  .dark .vote-button-abstain {
-    @apply bg-gray-800/50 border-gray-600 text-gray-300 hover:bg-gray-800/70;
-  }
+  /* Better border contrast */
+  --border: 217.2 32.6% 20%;
+  --input: 217.2 32.6% 20%;
+}
 
-  .dark .progress-bar {
-    @apply bg-muted;
-  }
+/* Custom styles for voting buttons in dark mode */
+.dark .vote-button-yes {
+  @apply bg-green-900/20 border-green-700 text-green-400 hover:bg-green-900/30;
+}
 
-  .dark .progress-bar > div {
-    @apply bg-primary;
-  }
+.dark .vote-button-no {
+  @apply bg-red-900/20 border-red-700 text-red-400 hover:bg-red-900/30;
+}
+
+.dark .vote-button-abstain {
+  @apply bg-gray-800/50 border-gray-600 text-gray-300 hover:bg-gray-800/70;
+}
+
+/* Progress bar enhancements for dark mode */
+.dark .progress-bar {
+  @apply bg-muted;
+}
+
+.dark .progress-bar > div {
+  @apply bg-primary;
 }
