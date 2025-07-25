@@ -1,8 +1,8 @@
-// File: /home/poggufanz/whcl/dao-tools/src/dao-tools-frontend/app/create-proposal/page.tsx
-import * as entry from '../../../../app/create-proposal/page.js'
+// File: /home/poggufanz/whcl/dao-tools/src/dao-tools-frontend/app/claim-nft/page.tsx
+import * as entry from '../../../../app/claim-nft/page.js'
 import type { ResolvingMetadata, ResolvingViewport } from 'next/dist/lib/metadata/types/metadata-interface.js'
 
-type TEntry = typeof import('../../../../app/create-proposal/page.js')
+type TEntry = typeof import('../../../../app/claim-nft/page.js')
 
 type SegmentParams<T extends Object = any> = T extends Record<string, any>
   ? { [K in keyof T]: T[K] extends string ? string | string[] | undefined : never }

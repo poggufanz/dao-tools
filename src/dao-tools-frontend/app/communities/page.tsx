@@ -161,9 +161,6 @@ export default function CommunitiesPage() {
             <Link href="/communities" className="text-foreground font-medium">
               Communities
             </Link>
-            <Link href="/create-proposal" className="text-muted-foreground hover:text-foreground">
-              Create
-            </Link>
             <Link href="/chat" className="text-muted-foreground hover:text-foreground">
               Chat
             </Link>
