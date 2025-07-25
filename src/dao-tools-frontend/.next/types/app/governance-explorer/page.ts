@@ -1,8 +1,8 @@
-// File: /home/poggufanz/whcl/dao-tools/src/dao-tools-frontend/app/admin/page.tsx
-import * as entry from '../../../../app/admin/page.js'
+// File: /home/poggufanz/whcl/dao-tools/src/dao-tools-frontend/app/governance-explorer/page.tsx
+import * as entry from '../../../../app/governance-explorer/page.js'
 import type { ResolvingMetadata, ResolvingViewport } from 'next/dist/lib/metadata/types/metadata-interface.js'
 
-type TEntry = typeof import('../../../../app/admin/page.js')
+type TEntry = typeof import('../../../../app/governance-explorer/page.js')
 
 type SegmentParams<T extends Object = any> = T extends Record<string, any>
   ? { [K in keyof T]: T[K] extends string ? string | string[] | undefined : never }
