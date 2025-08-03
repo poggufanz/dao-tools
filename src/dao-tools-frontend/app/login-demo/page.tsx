@@ -46,7 +46,7 @@ export default function LoginDemo() {
             <div className="w-8 h-8 bg-primary rounded-lg flex items-center justify-center">
               <span className="text-primary-foreground font-bold">DT</span>
             </div>
-            <span className="text-xl font-bold">DAO Tools</span>
+            <span className="text-xl font-bold">OpenVote</span>
           </div>
           <nav className="hidden md:flex items-center space-x-6">
             <Link href="/" className="text-muted-foreground hover:text-foreground">
@@ -77,7 +77,7 @@ export default function LoginDemo() {
         <div className="max-w-2xl mx-auto text-center mb-12">
           <h1 className="text-4xl font-bold mb-4">Login Interface Demo</h1>
           <p className="text-xl text-muted-foreground mb-8">
-            Experience our multi-method authentication system for DAO Tools
+            Experience our multi-method authentication system for OpenVote
           </p>
         </div>
 
@@ -106,7 +106,7 @@ export default function LoginDemo() {
           <Card>
             <CardHeader>
               <CardTitle>Authentication Methods</CardTitle>
-              <CardDescription>DAO Tools supports multiple login options for maximum accessibility</CardDescription>
+              <CardDescription>OpenVote supports multiple login options for maximum accessibility</CardDescription>
             </CardHeader>
             <CardContent className="space-y-3">
               <div className="flex items-center gap-3">

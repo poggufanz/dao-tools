@@ -109,7 +109,7 @@ export default function AdminPanel() {
             <div className="w-8 h-8 bg-primary rounded-lg flex items-center justify-center">
               <span className="text-primary-foreground font-bold">DT</span>
             </div>
-            <span className="text-xl font-bold">DAO Tools</span>
+            <span className="text-xl font-bold">OpenVote</span>
           </div>
           <nav className="hidden md:flex items-center space-x-6">
             <Link href="/dashboard" className="text-muted-foreground hover:text-foreground">
