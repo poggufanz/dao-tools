@@ -1,13 +1,15 @@
 "use client"
 
-import { useState } from "react"
+import { useState, useCallback } from "react"
 import { Button } from "@/components/ui/button"
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card"
 import { Badge } from "@/components/ui/badge"
 import { Shield, Users, Coins, Settings, School, Building, Rocket, Globe } from "lucide-react"
 import Link from "next/link"
 import { ThemeToggle } from "@/components/theme-toggle"
+import { useDisconnect } from 'wagmi'
 import { LoginModal } from "@/components/login-modal"
+import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuTrigger } from "@/components/ui/dropdown-menu"
 
 export default function HomePage() {
   const [isLoginModalOpen, setIsLoginModalOpen] = useState(false)
@@ -17,13 +19,30 @@ export default function HomePage() {
     identity: "",
   })
 
-  const handleLogin = (method: string, identity: string) => {
+  const { disconnect } = useDisconnect()
+
+  const handleLogout = useCallback(() => {
+    if (loginState.method === 'wallet') {
+      disconnect()
+    }
+    setLoginState({
+      isLoggedIn: false,
+      method: "",
+      identity: "",
+    })
+  }, [loginState.method, disconnect])
+
+  const handleLogin = useCallback((method: string, identity: string) => {
     setLoginState({
       isLoggedIn: true,
       method,
       identity,
     })
-  }
+  }, [])
+
+  const closeLoginModal = useCallback(() => {
+    setIsLoginModalOpen(false)
+  }, [])
 
   const features = [
     {
@@ -80,7 +99,7 @@ export default function HomePage() {
             <div className="w-8 h-8 bg-primary rounded-lg flex items-center justify-center">
               <span className="text-primary-foreground font-bold">DT</span>
             </div>
-            <span className="text-xl font-bold">DAO Tools</span>
+            <span className="text-xl font-bold">OpenVote</span>
           </div>
           <nav className="hidden md:flex items-center space-x-6">
             <Link href="#features" className="text-muted-foreground hover:text-foreground">
@@ -105,12 +124,16 @@ export default function HomePage() {
                 </Button>
               </>
             ) : (
-              <div className="flex items-center space-x-2">
-                <span className="text-sm">Welcome back!</span>
-                <Button asChild>
-                  <Link href="/dashboard">Dashboard</Link>
-                </Button>
-              </div>
+              <DropdownMenu>
+                <DropdownMenuTrigger asChild>
+                  <Button variant="outline">
+                    {`${loginState.identity.slice(0, 6)}...${loginState.identity.slice(-4)}`}
+                  </Button>
+                </DropdownMenuTrigger>
+                <DropdownMenuContent>
+                  <DropdownMenuItem onClick={handleLogout}>Logout</DropdownMenuItem>
+                </DropdownMenuContent>
+              </DropdownMenu>
             )}
           </div>
         </div>
@@ -168,7 +191,7 @@ export default function HomePage() {
       <section id="use-cases" className="py-20 px-4">
         <div className="container mx-auto">
           <div className="text-center mb-12">
-            <h2 className="text-3xl font-bold mb-4">Who Can Use DAO Tools?</h2>
+            <h2 className="text-3xl font-bold mb-4">Who Can Use OpenVote?</h2>
             <p className="text-muted-foreground max-w-2xl mx-auto">
               From traditional organizations to Web3 communities, we support all types of governance
             </p>
@@ -196,7 +219,7 @@ export default function HomePage() {
         <div className="container mx-auto text-center">
           <h2 className="text-3xl font-bold mb-4">Ready to Get Started?</h2>
           <p className="text-xl mb-8 opacity-90">
-            Join thousands of organizations using DAO Tools for transparent governance
+            Join thousands of organizations using OpenVote for transparent governance
           </p>
           <Button size="lg" variant="secondary" asChild>
             <Link href="/dashboard">Start Voting Today</Link>
@@ -213,7 +236,7 @@ export default function HomePage() {
                 <div className="w-8 h-8 bg-primary rounded-lg flex items-center justify-center">
                   <span className="text-primary-foreground font-bold">DT</span>
                 </div>
-                <span className="text-xl font-bold">DAO Tools</span>
+                <span className="text-xl font-bold">OpenVote</span>
               </div>
               <p className="text-muted-foreground">Transparent voting for everyone, everywhere.</p>
             </div>
@@ -279,12 +302,14 @@ export default function HomePage() {
             </div>
           </div>
           <div className="border-t mt-8 pt-8 text-center text-muted-foreground">
-            <p>&copy; 2024 DAO Tools. All rights reserved.</p>
+            <p>&copy; 2024 OpenVote. All rights reserved.</p>
           </div>
         </div>
       </footer>
       {/* Login Modal */}
-      <LoginModal isOpen={isLoginModalOpen} onClose={() => setIsLoginModalOpen(false)} onLogin={handleLogin} />
+      <LoginModal isOpen={isLoginModalOpen} onClose={closeLoginModal} onLogin={handleLogin} />
+
+      
     </div>
   )
 }

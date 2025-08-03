@@ -1,6 +1,9 @@
 "use client"
 
-import { useState } from "react"
+import { useState, useEffect } from "react"
+import { useWeb3Modal } from '@web3modal/wagmi/react'
+import { useAccount, useDisconnect } from 'wagmi'
+import { useInternetIdentity } from '@/contexts/InternetIdentityProvider'
 import { Dialog, DialogContent, DialogDescription, DialogHeader, DialogTitle } from "@/components/ui/dialog"
 import { Button } from "@/components/ui/button"
 import { Badge } from "@/components/ui/badge"
@@ -58,11 +61,42 @@ interface LoginState {
 
 export function LoginModal({ isOpen, onClose, onLogin }: LoginModalProps) {
   const [isLoading, setIsLoading] = useState<string | null>(null)
+  const { open } = useWeb3Modal()
+  const { address, isConnected } = useAccount()
+  const { identity, isAuthenticated, login: iiLogin, logout: iiLogout } = useInternetIdentity()
+
+  useEffect(() => {
+    if (isConnected && address) {
+      onLogin("wallet", address)
+      onClose()
+    }
+  }, [isConnected, address, onLogin, onClose])
+
+  useEffect(() => {
+    if (isAuthenticated && identity) {
+      onLogin("internet-identity", identity.getPrincipal().toText())
+      onClose()
+    }
+  }, [isAuthenticated, identity, onLogin, onClose])
+
 
   const handleLogin = async (method: string) => {
     setIsLoading(method)
 
-    // Simulate authentication delay
+    if (method === 'wallet') {
+      await open()
+      // The useEffect will handle the rest
+      setIsLoading(null)
+      return;
+    }
+    if (method === 'internet-identity') {
+      await iiLogin()
+      // The useEffect will handle the rest
+      setIsLoading(null)
+      return;
+    }
+
+    // Simulate authentication delay for other methods
     await new Promise((resolve) => setTimeout(resolve, 1500))
 
     // Mock authentication responses
@@ -71,9 +105,9 @@ export function LoginModal({ isOpen, onClose, onLogin }: LoginModalProps) {
       case "internet-identity":
         identity = "rdmx6-jaaaa-aaaah-qcaiq-cai"
         break
-      case "wallet":
-        identity = "0x742d35Cc6634C0532925a3b8D4C0532925a3b8D4"
-        break
+      // case "wallet": // This is now handled by Web3Modal
+      //   identity = "0x742d35Cc6634C0532925a3b8D4C0532925a3b8D4"
+      //   break
       case "google":
         identity = "alice.johnson@gmail.com"
         break
@@ -83,8 +117,10 @@ export function LoginModal({ isOpen, onClose, onLogin }: LoginModalProps) {
     }
 
     setIsLoading(null)
-    onLogin(method, identity)
-    onClose()
+    if (identity) {
+        onLogin(method, identity)
+        onClose()
+    }
   }
 
   const loginMethods = [
@@ -127,7 +163,7 @@ export function LoginModal({ isOpen, onClose, onLogin }: LoginModalProps) {
               <span className="text-primary-foreground font-bold text-lg">DT</span>
             </div>
           </div>
-          <DialogTitle className="text-2xl font-bold">Login to DAO Tools</DialogTitle>
+          <DialogTitle className="text-2xl font-bold">Login to OpenVote</DialogTitle>
           <DialogDescription className="text-base">Choose your preferred login method</DialogDescription>
         </DialogHeader>
 
@@ -212,7 +248,20 @@ interface UserProfileProps {
 }
 
 export function UserProfile({ loginState, onLogout }: UserProfileProps) {
+  const { disconnect } = useDisconnect()
+  const { logout: iiLogout } = useInternetIdentity()
+
   if (!loginState.isLoggedIn) return null
+
+  const handleLogout = () => {
+    if (loginState.method === 'wallet') {
+      disconnect()
+    }
+    if (loginState.method === 'internet-identity') {
+      iiLogout()
+    }
+    onLogout()
+  }
 
   const getMethodLabel = (method: string) => {
     switch (method) {
@@ -258,7 +307,7 @@ export function UserProfile({ loginState, onLogout }: UserProfileProps) {
           <CheckCircle className="w-8 h-8 text-green-600" />
         </div>
         <CardTitle className="text-lg">Successfully Logged In</CardTitle>
-        <CardDescription>Welcome to DAO Tools</CardDescription>
+        <CardDescription>Welcome to OpenVote</CardDescription>
       </CardHeader>
       <CardContent className="space-y-4">
         <div className="flex items-center gap-3 p-3 bg-muted/50 rounded-lg">
@@ -274,7 +323,7 @@ export function UserProfile({ loginState, onLogout }: UserProfileProps) {
             <span className="text-sm text-muted-foreground">Method:</span>
             <Badge className={getMethodColor(loginState.method)}>{getMethodLabel(loginState.method)}</Badge>
           </div>
-          <Button variant="outline" size="sm" onClick={onLogout} className="flex items-center gap-1 bg-transparent">
+          <Button variant="outline" size="sm" onClick={handleLogout} className="flex items-center gap-1 bg-transparent">
             <LogOut className="w-3 h-3" />
             Logout
           </Button>
