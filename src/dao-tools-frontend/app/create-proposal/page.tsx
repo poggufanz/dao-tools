@@ -72,32 +72,7 @@ export default function CreateProposal() {
 
   return (
     <div className="min-h-screen bg-background">
-      {/* Header */}
-      <header className="border-b">
-        <div className="container mx-auto px-4 py-4 flex items-center justify-between">
-          <div className="flex items-center space-x-2">
-            <div className="w-8 h-8 bg-primary rounded-lg flex items-center justify-center">
-              <span className="text-primary-foreground font-bold">DT</span>
-            </div>
-            <span className="text-xl font-bold">OpenVote</span>
-          </div>
-          <nav className="hidden md:flex items-center space-x-6">
-            <Link href="/dashboard" className="text-muted-foreground hover:text-foreground">
-              Dashboard
-            </Link>
-            <Link href="/create-proposal" className="text-foreground font-medium">
-              Create Proposal
-            </Link>
-            <Link href="/admin" className="text-muted-foreground hover:text-foreground">
-              Admin
-            </Link>
-          </nav>
-          <div className="flex items-center space-x-2">
-            <ThemeToggle />
-            <span className="text-sm font-medium">alice@university.edu</span>
-          </div>
-        </div>
-      </header>
+      
 
       <div className="container mx-auto px-4 py-8">
         <div className="max-w-4xl mx-auto">

@@ -145,39 +145,7 @@ export default function CommunitiesPage() {
 
   return (
     <div className="min-h-screen bg-background">
-      {/* Header */}
-      <header className="border-b bg-background/95 backdrop-blur supports-[backdrop-filter]:bg-background/60 sticky top-0 z-50">
-        <div className="container mx-auto px-4 py-4 flex items-center justify-between">
-          <div className="flex items-center space-x-2">
-            <div className="w-8 h-8 bg-primary rounded-lg flex items-center justify-center">
-              <span className="text-primary-foreground font-bold">DT</span>
-            </div>
-            <span className="text-xl font-bold">OpenVote</span>
-          </div>
-          <nav className="hidden md:flex items-center space-x-6">
-            <Link href="/dashboard" className="text-muted-foreground hover:text-foreground">
-              Dashboard
-            </Link>
-            <Link href="/communities" className="text-foreground font-medium">
-              Communities
-            </Link>
-            <Link href="/chat" className="text-muted-foreground hover:text-foreground">
-              Chat
-            </Link>
-          </nav>
-          <div className="flex items-center space-x-2">
-            <Button variant="ghost" size="icon" asChild>
-              <Link href="/notifications">
-                <Bell className="w-4 h-4" />
-              </Link>
-            </Button>
-            <ThemeToggle />
-            <Avatar className="w-8 h-8">
-              <AvatarFallback>JD</AvatarFallback>
-            </Avatar>
-          </div>
-        </div>
-      </header>
+      
 
       <div className="container mx-auto px-4 py-8">
         {/* Page Header */}

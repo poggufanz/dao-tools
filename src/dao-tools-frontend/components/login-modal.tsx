@@ -1,9 +1,9 @@
 "use client"
 
-import { useState, useEffect } from "react"
+import { useState } from "react"
 import { useWeb3Modal } from '@web3modal/wagmi/react'
-import { useAccount, useDisconnect } from 'wagmi'
 import { useInternetIdentity } from '@/contexts/InternetIdentityProvider'
+import { useAuth } from '@/contexts/AuthProvider'
 import { Dialog, DialogContent, DialogDescription, DialogHeader, DialogTitle } from "@/components/ui/dialog"
 import { Button } from "@/components/ui/button"
 import { Badge } from "@/components/ui/badge"
@@ -50,76 +50,30 @@ const InternetComputerIcon = () => (
 interface LoginModalProps {
   isOpen: boolean
   onClose: () => void
-  onLogin: (method: string, identity: string) => void
 }
 
-interface LoginState {
-  isLoggedIn: boolean
-  method: string
-  identity: string
-}
-
-export function LoginModal({ isOpen, onClose, onLogin }: LoginModalProps) {
+export function LoginModal({ isOpen, onClose }: LoginModalProps) {
   const [isLoading, setIsLoading] = useState<string | null>(null)
   const { open } = useWeb3Modal()
-  const { address, isConnected } = useAccount()
-  const { identity, isAuthenticated, login: iiLogin, logout: iiLogout } = useInternetIdentity()
-
-  useEffect(() => {
-    if (isConnected && address) {
-      onLogin("wallet", address)
-      onClose()
-    }
-  }, [isConnected, address, onLogin, onClose])
-
-  useEffect(() => {
-    if (isAuthenticated && identity) {
-      onLogin("internet-identity", identity.getPrincipal().toText())
-      onClose()
-    }
-  }, [isAuthenticated, identity, onLogin, onClose])
-
+  const { login: iiLogin } = useInternetIdentity()
+  const { isAuthenticated } = useAuth()
 
   const handleLogin = async (method: string) => {
     setIsLoading(method)
-
-    if (method === 'wallet') {
-      await open()
-      // The useEffect will handle the rest
+    try {
+      if (method === 'wallet') {
+        await open()
+      } else if (method === 'internet-identity') {
+        await iiLogin()
+      }
+      // On successful login, the AuthProvider will update the state,
+      // and the useEffect in the parent component will close the modal.
+    } catch (error) {
+      console.error("Login failed", error)
+    } finally {
       setIsLoading(null)
-      return;
-    }
-    if (method === 'internet-identity') {
-      await iiLogin()
-      // The useEffect will handle the rest
-      setIsLoading(null)
-      return;
-    }
-
-    // Simulate authentication delay for other methods
-    await new Promise((resolve) => setTimeout(resolve, 1500))
-
-    // Mock authentication responses
-    let identity = ""
-    switch (method) {
-      case "internet-identity":
-        identity = "rdmx6-jaaaa-aaaah-qcaiq-cai"
-        break
-      // case "wallet": // This is now handled by Web3Modal
-      //   identity = "0x742d35Cc6634C0532925a3b8D4C0532925a3b8D4"
-      //   break
-      case "google":
-        identity = "alice.johnson@gmail.com"
-        break
-      case "email":
-        identity = "alice@university.edu"
-        break
-    }
-
-    setIsLoading(null)
-    if (identity) {
-        onLogin(method, identity)
-        onClose()
+      // We can close the modal optimistically, or wait for auth state to propagate
+      onClose()
     }
   }
 
@@ -157,85 +111,91 @@ export function LoginModal({ isOpen, onClose, onLogin }: LoginModalProps) {
   return (
     <Dialog open={isOpen} onOpenChange={onClose}>
       <DialogContent className="sm:max-w-md">
-        <DialogHeader className="text-center">
-          <div className="flex items-center justify-center mb-4">
-            <div className="w-12 h-12 bg-primary rounded-lg flex items-center justify-center">
-              <span className="text-primary-foreground font-bold text-lg">DT</span>
+        {isAuthenticated ? (
+          <UserProfile onClose={onClose} />
+        ) : (
+          <>
+            <DialogHeader className="text-center">
+              <div className="flex items-center justify-center mb-4">
+                <div className="w-12 h-12 bg-primary rounded-lg flex items-center justify-center">
+                  <span className="text-primary-foreground font-bold text-lg">DT</span>
+                </div>
+              </div>
+              <DialogTitle className="text-2xl font-bold">Login to OpenVote</DialogTitle>
+              <DialogDescription className="text-base">Choose your preferred login method</DialogDescription>
+            </DialogHeader>
+
+            <div className="space-y-4 py-4">
+              {/* Primary login methods */}
+              <div className="space-y-3">
+                {loginMethods
+                  .filter((method) => method.primary)
+                  .map((method) => (
+                    <Button
+                      key={method.id}
+                      variant="outline"
+                      className="w-full h-12 justify-start gap-3 text-left bg-transparent"
+                      onClick={() => handleLogin(method.id)}
+                      disabled={isLoading !== null}
+                    >
+                      {isLoading === method.id ? (
+                        <div className="w-5 h-5 border-2 border-primary border-t-transparent rounded-full animate-spin" />
+                      ) : (
+                        <method.icon />
+                      )}
+                      <div className="flex-1">
+                        <div className="font-medium">{method.label}</div>
+                        <div className="text-xs text-muted-foreground">{method.description}</div>
+                      </div>
+                    </Button>
+                  ))}
+              </div>
+
+              {/* Separator */}
+              <div className="relative">
+                <div className="absolute inset-0 flex items-center">
+                  <Separator className="w-full" />
+                </div>
+                <div className="relative flex justify-center text-xs uppercase">
+                  <span className="bg-background px-2 text-muted-foreground">or</span>
+                </div>
+              </div>
+
+              {/* Secondary login methods */}
+              <div className="space-y-3">
+                {loginMethods
+                  .filter((method) => !method.primary)
+                  .map((method) => (
+                    <Button
+                      key={method.id}
+                      variant="outline"
+                      className="w-full h-12 justify-start gap-3 text-left bg-transparent"
+                      onClick={() => handleLogin(method.id)}
+                      disabled={isLoading !== null}
+                    >
+                      {isLoading === method.id ? (
+                        <div className="w-5 h-5 border-2 border-primary border-t-transparent rounded-full animate-spin" />
+                      ) : (
+                        <method.icon />
+                      )}
+                      <div className="flex-1">
+                        <div className="font-medium">{method.label}</div>
+                        <div className="text-xs text-muted-foreground">{method.description}</div>
+                      </div>
+                    </Button>
+                  ))}
+              </div>
             </div>
-          </div>
-          <DialogTitle className="text-2xl font-bold">Login to OpenVote</DialogTitle>
-          <DialogDescription className="text-base">Choose your preferred login method</DialogDescription>
-        </DialogHeader>
 
-        <div className="space-y-4 py-4">
-          {/* Primary login methods */}
-          <div className="space-y-3">
-            {loginMethods
-              .filter((method) => method.primary)
-              .map((method) => (
-                <Button
-                  key={method.id}
-                  variant="outline"
-                  className="w-full h-12 justify-start gap-3 text-left bg-transparent"
-                  onClick={() => handleLogin(method.id)}
-                  disabled={isLoading !== null}
-                >
-                  {isLoading === method.id ? (
-                    <div className="w-5 h-5 border-2 border-primary border-t-transparent rounded-full animate-spin" />
-                  ) : (
-                    <method.icon />
-                  )}
-                  <div className="flex-1">
-                    <div className="font-medium">{method.label}</div>
-                    <div className="text-xs text-muted-foreground">{method.description}</div>
-                  </div>
-                </Button>
-              ))}
-          </div>
-
-          {/* Separator */}
-          <div className="relative">
-            <div className="absolute inset-0 flex items-center">
-              <Separator className="w-full" />
+            {/* Disclaimer */}
+            <div className="text-center">
+              <p className="text-xs text-muted-foreground flex items-center justify-center gap-1">
+                <Shield className="w-3 h-3" />
+                We use decentralized authentication when available
+              </p>
             </div>
-            <div className="relative flex justify-center text-xs uppercase">
-              <span className="bg-background px-2 text-muted-foreground">or</span>
-            </div>
-          </div>
-
-          {/* Secondary login methods */}
-          <div className="space-y-3">
-            {loginMethods
-              .filter((method) => !method.primary)
-              .map((method) => (
-                <Button
-                  key={method.id}
-                  variant="outline"
-                  className="w-full h-12 justify-start gap-3 text-left bg-transparent"
-                  onClick={() => handleLogin(method.id)}
-                  disabled={isLoading !== null}
-                >
-                  {isLoading === method.id ? (
-                    <div className="w-5 h-5 border-2 border-primary border-t-transparent rounded-full animate-spin" />
-                  ) : (
-                    <method.icon />
-                  )}
-                  <div className="flex-1">
-                    <div className="font-medium">{method.label}</div>
-                    <div className="text-xs text-muted-foreground">{method.description}</div>
-                  </div>
-                </Button>
-              ))}
-          </div>
-        </div>
-
-        {/* Disclaimer */}
-        <div className="text-center">
-          <p className="text-xs text-muted-foreground flex items-center justify-center gap-1">
-            <Shield className="w-3 h-3" />
-            We use decentralized authentication when available
-          </p>
-        </div>
+          </>
+        )}
       </DialogContent>
     </Dialog>
   )
@@ -243,24 +203,17 @@ export function LoginModal({ isOpen, onClose, onLogin }: LoginModalProps) {
 
 // Success state component
 interface UserProfileProps {
-  loginState: LoginState
-  onLogout: () => void
+    onClose: () => void;
 }
 
-export function UserProfile({ loginState, onLogout }: UserProfileProps) {
-  const { disconnect } = useDisconnect()
-  const { logout: iiLogout } = useInternetIdentity()
+export function UserProfile({ onClose }: UserProfileProps) {
+  const { identity, method, logout } = useAuth()
 
-  if (!loginState.isLoggedIn) return null
+  if (!identity || !method) return null
 
   const handleLogout = () => {
-    if (loginState.method === 'wallet') {
-      disconnect()
-    }
-    if (loginState.method === 'internet-identity') {
-      iiLogout()
-    }
-    onLogout()
+    logout();
+    onClose();
   }
 
   const getMethodLabel = (method: string) => {
@@ -301,7 +254,7 @@ export function UserProfile({ loginState, onLogout }: UserProfileProps) {
   }
 
   return (
-    <Card className="w-full max-w-md mx-auto">
+    <Card className="w-full max-w-md mx-auto border-none shadow-none">
       <CardHeader className="text-center pb-3">
         <div className="flex items-center justify-center mb-2">
           <CheckCircle className="w-8 h-8 text-green-600" />
@@ -314,14 +267,14 @@ export function UserProfile({ loginState, onLogout }: UserProfileProps) {
           <User className="w-5 h-5 text-muted-foreground" />
           <div className="flex-1 min-w-0">
             <p className="text-sm font-medium">Logged in as</p>
-            <p className="text-sm text-muted-foreground font-mono truncate">{formatIdentity(loginState.identity)}</p>
+            <p className="text-sm text-muted-foreground font-mono truncate">{formatIdentity(identity)}</p>
           </div>
         </div>
 
         <div className="flex items-center justify-between">
           <div className="flex items-center gap-2">
             <span className="text-sm text-muted-foreground">Method:</span>
-            <Badge className={getMethodColor(loginState.method)}>{getMethodLabel(loginState.method)}</Badge>
+            <Badge className={getMethodColor(method)}>{getMethodLabel(method)}</Badge>
           </div>
           <Button variant="outline" size="sm" onClick={handleLogout} className="flex items-center gap-1 bg-transparent">
             <LogOut className="w-3 h-3" />

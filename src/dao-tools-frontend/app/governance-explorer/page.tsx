@@ -235,27 +235,7 @@ export default function GovernanceExplorerPage() {
 
   return (
     <div className="min-h-screen bg-background">
-      {/* Header */}
-      <header className="border-b bg-background/95 backdrop-blur supports-[backdrop-filter]:bg-background/60 sticky top-0 z-50">
-        <div className="container mx-auto px-4 py-4 flex items-center justify-between">
-          <div className="flex items-center space-x-4">
-            <Button variant="ghost" size="icon" asChild>
-              <Link href="/dashboard">
-                <ArrowLeft className="w-4 h-4" />
-              </Link>
-            </Button>
-            <div className="flex items-center space-x-2">
-              <div className="w-8 h-8 bg-primary rounded-lg flex items-center justify-center">
-                <span className="text-primary-foreground font-bold">OV</span>
-              </div>
-              <span className="text-xl font-bold">OpenVote</span>
-            </div>
-          </div>
-          <div className="flex items-center space-x-2">
-            <ThemeToggle />
-          </div>
-        </div>
-      </header>
+      
 
       <div className="container mx-auto px-4 py-8">
         {/* Page Header */}

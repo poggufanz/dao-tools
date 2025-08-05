@@ -5,18 +5,6 @@ export default function GovernanceExplorerLoading() {
   return (
     <div className="min-h-screen bg-background">
       {/* Header Skeleton */}
-      <header className="border-b bg-background/95 backdrop-blur supports-[backdrop-filter]:bg-background/60 sticky top-0 z-50">
-        <div className="container mx-auto px-4 py-4 flex items-center justify-between">
-          <div className="flex items-center space-x-4">
-            <Skeleton className="w-8 h-8" />
-            <div className="flex items-center space-x-2">
-              <Skeleton className="w-8 h-8 rounded-lg" />
-              <Skeleton className="w-24 h-6" />
-            </div>
-          </div>
-          <Skeleton className="w-8 h-8" />
-        </div>
-      </header>
 
       <div className="container mx-auto px-4 py-8">
         {/* Page Header Skeleton */}
