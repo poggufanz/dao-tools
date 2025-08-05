@@ -1,4 +1,4 @@
-"use client"
+'use client'
 
 import { useState, useCallback } from "react"
 import { Button } from "@/components/ui/button"
@@ -10,35 +10,15 @@ import { ThemeToggle } from "@/components/theme-toggle"
 import { useDisconnect } from 'wagmi'
 import { LoginModal } from "@/components/login-modal"
 import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuTrigger } from "@/components/ui/dropdown-menu"
+import { useAuth } from "@/contexts/AuthProvider"
 
 export default function HomePage() {
   const [isLoginModalOpen, setIsLoginModalOpen] = useState(false)
-  const [loginState, setLoginState] = useState({
-    isLoggedIn: false,
-    method: "",
-    identity: "",
-  })
-
-  const { disconnect } = useDisconnect()
+  const { isAuthenticated, identity, logout } = useAuth()
 
   const handleLogout = useCallback(() => {
-    if (loginState.method === 'wallet') {
-      disconnect()
-    }
-    setLoginState({
-      isLoggedIn: false,
-      method: "",
-      identity: "",
-    })
-  }, [loginState.method, disconnect])
-
-  const handleLogin = useCallback((method: string, identity: string) => {
-    setLoginState({
-      isLoggedIn: true,
-      method,
-      identity,
-    })
-  }, [])
+    logout()
+  }, [logout])
 
   const closeLoginModal = useCallback(() => {
     setIsLoginModalOpen(false)
@@ -93,51 +73,6 @@ export default function HomePage() {
   return (
     <div className="min-h-screen bg-background">
       {/* Header */}
-      <header className="border-b">
-        <div className="container mx-auto px-4 py-4 flex items-center justify-between">
-          <div className="flex items-center space-x-2">
-            <div className="w-8 h-8 bg-primary rounded-lg flex items-center justify-center">
-              <span className="text-primary-foreground font-bold">DT</span>
-            </div>
-            <span className="text-xl font-bold">OpenVote</span>
-          </div>
-          <nav className="hidden md:flex items-center space-x-6">
-            <Link href="#features" className="text-muted-foreground hover:text-foreground">
-              Features
-            </Link>
-            <Link href="#use-cases" className="text-muted-foreground hover:text-foreground">
-              Use Cases
-            </Link>
-            <Link href="/dashboard" className="text-muted-foreground hover:text-foreground">
-              Dashboard
-            </Link>
-          </nav>
-          <div className="flex items-center space-x-2">
-            <ThemeToggle />
-            {!loginState.isLoggedIn ? (
-              <>
-                <Button variant="ghost" onClick={() => setIsLoginModalOpen(true)}>
-                  Sign In
-                </Button>
-                <Button asChild>
-                  <Link href="/dashboard">Get Started</Link>
-                </Button>
-              </>
-            ) : (
-              <DropdownMenu>
-                <DropdownMenuTrigger asChild>
-                  <Button variant="outline">
-                    {`${loginState.identity.slice(0, 6)}...${loginState.identity.slice(-4)}`}
-                  </Button>
-                </DropdownMenuTrigger>
-                <DropdownMenuContent>
-                  <DropdownMenuItem onClick={handleLogout}>Logout</DropdownMenuItem>
-                </DropdownMenuContent>
-              </DropdownMenu>
-            )}
-          </div>
-        </div>
-      </header>
 
       {/* Hero Section */}
       <section className="py-20 px-4">
@@ -303,13 +238,12 @@ export default function HomePage() {
           </div>
           <div className="border-t mt-8 pt-8 text-center text-muted-foreground">
             <p>&copy; 2024 OpenVote. All rights reserved.</p>
+            <p>&copy; 2024 OpenVote. All rights reserved.</p>
           </div>
         </div>
       </footer>
       {/* Login Modal */}
-      <LoginModal isOpen={isLoginModalOpen} onClose={closeLoginModal} onLogin={handleLogin} />
-
-      
+      <LoginModal isOpen={isLoginModalOpen} onClose={closeLoginModal} />
     </div>
   )
 }

@@ -1,12 +1,14 @@
-"use client"
+'use client'
 
 import * as React from "react"
+import Link from "next/link"
 import { Slot } from "@radix-ui/react-slot"
 import { VariantProps, cva } from "class-variance-authority"
-import { PanelLeft } from "lucide-react"
+import { LogIn, PanelLeft } from "lucide-react"
 
 import { useIsMobile } from "@/hooks/use-mobile"
 import { cn } from "@/lib/utils"
+import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar"
 import { Button } from "@/components/ui/button"
 import { Input } from "@/components/ui/input"
 import { Separator } from "@/components/ui/separator"
@@ -18,6 +20,7 @@ import {
   TooltipProvider,
   TooltipTrigger,
 } from "@/components/ui/tooltip"
+import { useAuth } from "@/contexts/AuthProvider"
 
 const SIDEBAR_COOKIE_NAME = "sidebar:state"
 const SIDEBAR_COOKIE_MAX_AGE = 60 * 60 * 24 * 7
@@ -228,7 +231,7 @@ const Sidebar = React.forwardRef<
             "group-data-[collapsible=offcanvas]:w-0",
             "group-data-[side=right]:rotate-180",
             variant === "floating" || variant === "inset"
-              ? "group-data-[collapsible=icon]:w-[calc(var(--sidebar-width-icon)_+_theme(spacing.4))]"
+              ? "group-data-[collapsible=icon]:w-[calc(var(--sidebar-width-icon)_+_theme(spacing.4)))]"
               : "group-data-[collapsible=icon]:w-[--sidebar-width-icon]"
           )}
         />
@@ -735,6 +738,61 @@ const SidebarMenuSubButton = React.forwardRef<
 })
 SidebarMenuSubButton.displayName = "SidebarMenuSubButton"
 
+// New component to display user status
+const UserStatus = ({ onLoginClick }: { onLoginClick: () => void }) => {
+  const { isAuthenticated, identity, isLoading, logout } = useAuth()
+  const { state } = useSidebar()
+
+  const formatIdentity = (id: string) => {
+    if (id.length > 20) {
+      return `${id.slice(0, 6)}...${id.slice(-6)}`
+    }
+    return id
+  }
+
+  if (isLoading) {
+    return (
+      <div className="flex items-center gap-2 p-2">
+        <Skeleton className="h-8 w-8 rounded-full" />
+        <div className="w-full space-y-1 group-data-[collapsible=icon]:hidden">
+          <Skeleton className="h-4 w-24" />
+          <Skeleton className="h-3 w-16" />
+        </div>
+      </div>
+    )
+  }
+
+  if (!isAuthenticated) {
+    return (
+      <SidebarMenuItem>
+        <SidebarMenuButton
+          onClick={onLoginClick}
+          tooltip="Login"
+          className="justify-center"
+        >
+          <LogIn />
+          <span className="group-data-[collapsible=icon]:hidden">Login</span>
+        </SidebarMenuButton>
+      </SidebarMenuItem>
+    )
+  }
+
+  return (
+    <div className="flex w-full items-center gap-2 p-2">
+      <Avatar className="size-8">
+        <AvatarImage src={`https://avatar.vercel.sh/${identity}.png`} alt="User" />
+        <AvatarFallback>{identity?.[0].toUpperCase()}</AvatarFallback>
+      </Avatar>
+      <div className="flex-1 overflow-hidden group-data-[collapsible=icon]:hidden">
+        <p className="truncate text-sm font-medium">{identity && formatIdentity(identity)}</p>
+        <Link href="/dashboard" className="text-xs text-muted-foreground hover:underline">
+          View Dashboard
+        </Link>
+      </div>
+    </div>
+  )
+}
+
 export {
   Sidebar,
   SidebarContent,
@@ -759,5 +817,6 @@ export {
   SidebarRail,
   SidebarSeparator,
   SidebarTrigger,
+  UserStatus, // Export the new component
   useSidebar,
 }

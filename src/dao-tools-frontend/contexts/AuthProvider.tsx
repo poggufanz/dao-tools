@@ -3,6 +3,7 @@
 import React, { createContext, useContext, useState, useEffect, ReactNode, useCallback } from 'react';
 import { useAccount, useDisconnect } from 'wagmi';
 import { useInternetIdentity } from './InternetIdentityProvider';
+import { useRouter } from 'next/navigation';
 
 interface AuthState {
   identity: string | null;
@@ -32,6 +33,7 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
     method: null,
     isLoading: true,
   });
+  const router = useRouter();
 
   // Hooks from underlying providers
   const { address, isConnected, isConnecting, isReconnecting } = useAccount();
@@ -39,6 +41,7 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
   const { identity: iiIdentity, isAuthenticated: isIiAuthenticated, logout: iiLogout } = useInternetIdentity();
 
   useEffect(() => {
+    const wasAuthenticated = authState.isAuthenticated;
     if (isConnected && address) {
       setAuthState({ 
         isAuthenticated: true, 
@@ -46,6 +49,9 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
         method: 'wallet',
         isLoading: false,
       });
+      if (!wasAuthenticated) {
+        router.push('/dashboard');
+      }
     } else if (isIiAuthenticated && iiIdentity) {
       setAuthState({ 
         isAuthenticated: true, 
@@ -53,6 +59,9 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
         method: 'internet-identity',
         isLoading: false,
       });
+      if (!wasAuthenticated) {
+        router.push('/dashboard');
+      }
     } else {
         setAuthState({ 
             isAuthenticated: false, 
@@ -61,7 +70,7 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
             isLoading: isConnecting || isReconnecting, // Still loading if wagmi is trying to connect
         });
     }
-  }, [isConnected, address, isIiAuthenticated, iiIdentity, isConnecting, isReconnecting]);
+  }, [isConnected, address, isIiAuthenticated, iiIdentity, isConnecting, isReconnecting, router, authState.isAuthenticated]);
 
   const logout = useCallback(() => {
     if (authState.method === 'wallet') {
@@ -69,8 +78,9 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
     } else if (authState.method === 'internet-identity') {
       iiLogout();
     }
+    router.push('/');
     // The useEffect above will handle resetting the state
-  }, [authState.method, wagmiLogout, iiLogout]);
+  }, [authState.method, wagmiLogout, iiLogout, router]);
 
   const value = { ...authState, logout };
 

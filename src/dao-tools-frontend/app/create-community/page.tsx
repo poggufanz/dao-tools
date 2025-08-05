@@ -1,21 +1,45 @@
-"use client"
+"use client";
 
-import type React from "react"
-
-import { useState } from "react"
-import { Button } from "@/components/ui/button"
-import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card"
-import { Input } from "@/components/ui/input"
-import { Label } from "@/components/ui/label"
-import { Textarea } from "@/components/ui/textarea"
-import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select"
-import { Badge } from "@/components/ui/badge"
-import { Switch } from "@/components/ui/switch"
-import { Avatar, AvatarFallback } from "@/components/ui/avatar"
-import { Separator } from "@/components/ui/separator"
-import { ArrowLeft, Eye, Globe, Lock, Users, Shield, Settings, CheckCircle, ImageIcon, Hash, Bell } from "lucide-react"
-import Link from "next/link"
-import { ThemeToggle } from "@/components/theme-toggle"
+import { useState } from "react";
+import { useRouter } from "next/navigation";
+import Link from "next/link";
+import { useInternetIdentity } from "@/contexts/InternetIdentityProvider";
+import { useToast } from "@/hooks/use-toast";
+import { Button } from "@/components/ui/button";
+import {
+  Card,
+  CardContent,
+  CardDescription,
+  CardHeader,
+  CardTitle,
+} from "@/components/ui/card";
+import { Input } from "@/components/ui/input";
+import { Label } from "@/components/ui/label";
+import { Textarea } from "@/components/ui/textarea";
+import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from "@/components/ui/select";
+import { Badge } from "@/components/ui/badge";
+import { Switch } from "@/components/ui/switch";
+import { Avatar, AvatarFallback } from "@/components/ui/avatar";
+import { Separator } from "@/components/ui/separator";
+import {
+  ArrowLeft,
+  Eye,
+  Globe,
+  Lock,
+  Users,
+  Shield,
+  Settings,
+  CheckCircle,
+  ImageIcon,
+  Hash,
+  Loader2,
+} from "lucide-react";
 
 export default function CreateCommunityPage() {
   const [formData, setFormData] = useState({
@@ -33,10 +57,13 @@ export default function CreateCommunityPage() {
     minimumTokens: "",
     channels: ["general", "announcements"],
     newChannel: "",
-  })
-
-  const [showPreview, setShowPreview] = useState(false)
-  const [step, setStep] = useState(1)
+  });
+  const [showPreview, setShowPreview] = useState(false);
+  const [step, setStep] = useState(1);
+  const [isSubmitting, setIsSubmitting] = useState(false);
+  const { actor } = useInternetIdentity();
+  const { toast } = useToast();
+  const router = useRouter();
 
   const categories = [
     "DeFi",
@@ -49,106 +76,141 @@ export default function CreateCommunityPage() {
     "Investment",
     "Research",
     "Other",
-  ]
+  ];
 
   const handleInputChange = (field: string, value: string | boolean) => {
-    setFormData((prev) => ({ ...prev, [field]: value }))
-  }
+    setFormData((prev) => ({ ...prev, [field]: value }));
+  };
 
-  const handleFileUpload = (field: string, event: React.ChangeEvent<HTMLInputElement>) => {
-    const file = event.target.files?.[0] || null
-    setFormData((prev) => ({ ...prev, [field]: file }))
-  }
+  const handleFileUpload = (
+    field: string,
+    event: React.ChangeEvent<HTMLInputElement>
+  ) => {
+    const file = event.target.files?.[0] || null;
+    setFormData((prev) => ({ ...prev, [field]: file }));
+  };
 
   const handleAddChannel = () => {
-    if (formData.newChannel.trim() && !formData.channels.includes(formData.newChannel.trim())) {
+    const channel = formData.newChannel.trim();
+    if (channel && !formData.channels.includes(channel)) {
       setFormData((prev) => ({
         ...prev,
-        channels: [...prev.channels, prev.newChannel.trim()],
+        channels: [...prev.channels, channel],
         newChannel: "",
-      }))
+      }));
     }
-  }
+  };
 
   const handleRemoveChannel = (channel: string) => {
     if (channel !== "general") {
-      // Don't allow removing general channel
       setFormData((prev) => ({
         ...prev,
         channels: prev.channels.filter((c) => c !== channel),
-      }))
+      }));
     }
-  }
+  };
 
-  const handleSubmit = (e: React.FormEvent) => {
-    e.preventDefault()
-    console.log("Community created:", formData)
-    // Handle community creation
-    alert("Community created successfully!")
-  }
+  const handleSubmit = async (e: React.FormEvent) => {
+    e.preventDefault();
+    if (!actor) {
+      toast({
+        title: "Error",
+        description: "You must be logged in to create a community.",
+        variant: "destructive",
+      });
+      return;
+    }
+
+    setIsSubmitting(true);
+    try {
+      // Construct the payload with all necessary data
+      const communityPayload = {
+        name: formData.name,
+        tagline: formData.tagline,
+        description: formData.description,
+        category: formData.category,
+        logo: [], // Placeholder for logo upload logic
+        banner: [], // Placeholder for banner upload logic
+        isPrivate: formData.isPrivate,
+        requireApproval: formData.requireApproval,
+        // DFINITY doesn't directly support NFT gating from the frontend like this
+        // This would typically be a backend canister-to-canister interaction.
+        // We'll pass a simplified version for now.
+        nftGating: {
+          enabled: formData.enableNFTGating,
+          contract: formData.nftContract,
+        },
+        voting: {
+          method: formData.votingMethod,
+          minTokens: BigInt(formData.minimumTokens || 0),
+        },
+        channels: formData.channels,
+      };
+
+      // @ts-ignore
+      const result = await actor.createCommunity(communityPayload);
+
+      // Handle potential errors returned from the canister
+      if ('err' in result) {
+        throw new Error(Object.keys(result.err).join(', '));
+      }
+
+      const newCommunityId = result.ok.id.toString();
+
+      toast({
+        title: "Success!",
+        description: `Community "${formData.name}" has been created.`,
+        action: (
+          <Button asChild>
+            <Link href={`/community/${newCommunityId}`}>View Community</Link>
+          </Button>
+        ),
+      });
+      router.push(`/community/${newCommunityId}`);
+    } catch (error) {
+      console.error("Failed to create community:", error);
+      const errorMessage = error instanceof Error ? error.message : "An unknown error occurred.";
+      toast({
+        title: "Error Creating Community",
+        description: `Failed to create community: ${errorMessage}. Please check the console for more details and try again.`,
+        variant: "destructive",
+      });
+    } finally {
+      setIsSubmitting(false);
+    }
+  };
 
   const getCategoryColor = (category: string) => {
-    const colors = {
+    const colors: Record<string, string> = {
       DeFi: "bg-blue-100 text-blue-800 dark:bg-blue-900/20 dark:text-blue-400",
       Education: "bg-green-100 text-green-800 dark:bg-green-900/20 dark:text-green-400",
       Environment: "bg-emerald-100 text-emerald-800 dark:bg-emerald-900/20 dark:text-emerald-400",
       Tech: "bg-indigo-100 text-indigo-800 dark:bg-indigo-900/20 dark:text-indigo-400",
       Art: "bg-pink-100 text-pink-800 dark:bg-pink-900/20 dark:text-pink-400",
       Gaming: "bg-purple-100 text-purple-800 dark:bg-purple-900/20 dark:text-purple-400",
-    }
-    return colors[category as keyof typeof colors] || "bg-gray-100 text-gray-800 dark:bg-gray-900/20 dark:text-gray-400"
-  }
+    };
+    return colors[category] ||
+      "bg-gray-100 text-gray-800 dark:bg-gray-900/20 dark:text-gray-400";
+  };
 
   const getVotingMethodDescription = (method: string) => {
     switch (method) {
       case "one-person-one-vote":
-        return "Each verified member gets exactly one vote"
+        return "Each verified member gets exactly one vote";
       case "token-based":
-        return "Voting power based on token holdings"
+        return "Voting power based on token holdings";
       case "quadratic":
-        return "Cost of additional votes increases quadratically"
+        return "Cost of additional votes increases quadratically";
       case "nft-based":
-        return "Voting power based on NFT ownership"
+        return "Voting power based on NFT ownership";
       default:
-        return ""
+        return "";
     }
-  }
+  };
 
   return (
     <div className="min-h-screen bg-background">
       {/* Header */}
-      <header className="border-b bg-background/95 backdrop-blur supports-[backdrop-filter]:bg-background/60 sticky top-0 z-50">
-        <div className="container mx-auto px-4 py-4 flex items-center justify-between">
-          <div className="flex items-center space-x-2">
-            <div className="w-8 h-8 bg-primary rounded-lg flex items-center justify-center">
-              <span className="text-primary-foreground font-bold">DT</span>
-            </div>
-            <span className="text-xl font-bold"></span>
-          </div>
-          <nav className="hidden md:flex items-center space-x-6">
-            <Link href="/dashboard" className="text-muted-foreground hover:text-foreground">
-              Dashboard
-            </Link>
-            <Link href="/communities" className="text-muted-foreground hover:text-foreground">
-              Communities
-            </Link>
-            <Link href="/create-proposal" className="text-muted-foreground hover:text-foreground">
-              Create
-            </Link>
-          </nav>
-          <div className="flex items-center space-x-2">
-            <Button variant="ghost" size="icon" asChild>
-              <Link href="/notifications">
-                <Bell className="w-4 h-4" />
-              </Link>
-            </Button>
-            <ThemeToggle />
-            <Avatar className="w-8 h-8">
-              <AvatarFallback>JD</AvatarFallback>
-            </Avatar>
-          </div>
-        </div>
-      </header>
 
       <div className="container mx-auto px-4 py-8 max-w-6xl">
         {/* Page Header */}
@@ -179,9 +241,8 @@ export default function CreateCommunityPage() {
             {[1, 2, 3].map((stepNumber) => (
               <div key={stepNumber} className="flex items-center">
                 <div
-                  className={`w-8 h-8 rounded-full flex items-center justify-center text-sm font-medium ${
-                    step >= stepNumber ? "bg-primary text-primary-foreground" : "bg-muted text-muted-foreground"
-                  }`}
+                  className={`w-8 h-8 rounded-full flex items-center justify-center text-sm font-medium ${step >= stepNumber ? "bg-primary text-primary-foreground" : "bg-muted text-muted-foreground"
+                    }`}
                 >
                   {step > stepNumber ? <CheckCircle className="w-4 h-4" /> : stepNumber}
                 </div>
@@ -530,8 +591,15 @@ export default function CreateCommunityPage() {
                     Next
                   </Button>
                 ) : (
-                  <Button type="submit" className="bg-primary hover:bg-primary/90">
-                    Create Community
+                  <Button type="submit" className="bg-primary hover:bg-primary/90" disabled={isSubmitting}>
+                    {isSubmitting ? (
+                      <>
+                        <Loader2 className="mr-2 h-4 w-4 animate-spin" />
+                        Creating...
+                      </>
+                    ) : (
+                      "Create Community"
+                    )}
                   </Button>
                 )}
               </div>

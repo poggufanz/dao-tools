@@ -180,44 +180,7 @@ export default function ChatPage() {
 
       {/* Main Chat Area */}
       <div className="flex-1 flex flex-col">
-        {/* Chat Header */}
-        <header className="border-b bg-background/95 backdrop-blur supports-[backdrop-filter]:bg-background/60">
-          <div className="px-4 py-4 flex items-center justify-between">
-            <div className="flex items-center space-x-4">
-              <Button variant="ghost" size="sm" onClick={() => router.back()}>
-                <ArrowLeft className="w-4 h-4 mr-2" />
-                Previous
-              </Button>
-              <div className="flex items-center space-x-2">
-                <Hash className="w-5 h-5 text-muted-foreground" />
-                <h1 className="text-lg font-semibold">{selectedChannel}</h1>
-              </div>
-            </div>
-            <div className="flex items-center space-x-2">
-              <Button variant="ghost" size="icon">
-                <Search className="w-4 h-4" />
-              </Button>
-              <Button variant="ghost" size="icon">
-                <Phone className="w-4 h-4" />
-              </Button>
-              <Button variant="ghost" size="icon">
-                <Video className="w-4 h-4" />
-              </Button>
-              <Button variant="ghost" size="icon">
-                <Info className="w-4 h-4" />
-              </Button>
-              <Button variant="ghost" size="icon" asChild>
-                <Link href="/notifications">
-                  <Bell className="w-4 h-4" />
-                </Link>
-              </Button>
-              <ThemeToggle />
-              <Avatar className="w-8 h-8">
-                <AvatarFallback>JD</AvatarFallback>
-              </Avatar>
-            </div>
-          </div>
-        </header>
+        
 
         {/* Messages */}
         <ScrollArea className="flex-1 p-4">
