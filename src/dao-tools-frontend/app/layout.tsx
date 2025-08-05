@@ -64,10 +64,10 @@ function UserNav() {
         </DropdownMenuLabel>
         <DropdownMenuSeparator />
         <DropdownMenuItem asChild>
-            <Link href="/dashboard">Dashboard</Link>
+          <Link href="/dashboard">Dashboard</Link>
         </DropdownMenuItem>
         <DropdownMenuItem asChild>
-            <Link href="/settings">Settings</Link>
+          <Link href="/settings">Settings</Link>
         </DropdownMenuItem>
         <DropdownMenuSeparator />
         <DropdownMenuItem onClick={() => logout()}>
@@ -81,57 +81,57 @@ function UserNav() {
 function MainLayout({ children }: { children: React.ReactNode }) {
   return (
     <div className="min-h-screen flex flex-col">
-        <header className="border-b sticky top-0 bg-background/95 backdrop-blur-sm z-10">
-            <div className="container mx-auto px-4 py-3 flex items-center justify-between">
-                <div className="flex items-center space-x-4">
-                    <Link href="/" className="flex items-center space-x-2">
-                        <div className="w-8 h-8 bg-primary rounded-lg flex items-center justify-center">
-                            <span className="text-primary-foreground font-bold">OV</span>
-                        </div>
-                        <span className="text-xl font-bold">OpenVote</span>
-                    </Link>
-                    <nav className="hidden md:flex items-center space-x-6 text-sm font-medium">
-                        <Link href="/communities" className="text-muted-foreground hover:text-foreground transition-colors">
-                            Communities
-                        </Link>
-                        <Link href="/governance-explorer" className="text-muted-foreground hover:text-foreground transition-colors">
-                            Explorer
-                        </Link>
-                        <Link href="/chat" className="text-muted-foreground hover:text-foreground transition-colors">
-                            Chat
-                        </Link>
-                        <DropdownMenu>
-                          <DropdownMenuTrigger asChild>
-                            <Button variant="ghost" className="text-sm font-medium text-muted-foreground hover:text-foreground px-0">
-                              Create
-                            </Button>
-                          </DropdownMenuTrigger>
-                          <DropdownMenuContent>
-                            <DropdownMenuItem asChild>
-                              <Link href="/create-proposal">Create Proposal</Link>
-                            </DropdownMenuItem>
-                            <DropdownMenuItem asChild>
-                              <Link href="/create-vote">Create Vote</Link>
-                            </DropdownMenuItem>
-                          </DropdownMenuContent>
-                        </DropdownMenu>
-                    </nav>
-                </div>
-                <div className="flex items-center space-x-2">
-                    <NotificationBell />
-                    <ThemeToggle />
-                    <UserNav />
-                </div>
-            </div>
-        </header>
-        <main className="flex-1">
-            {children}
-        </main>
-        <footer className="border-t py-6 px-4">
-            <div className="container mx-auto text-center text-sm text-muted-foreground">
-                <p>&copy; 2024 OpenVote. All rights reserved.</p>
-            </div>
-        </footer>
+      <header className="border-b sticky top-0 bg-background/95 backdrop-blur-sm z-10">
+        <div className="container mx-auto px-4 py-3 flex items-center justify-between">
+          <div className="flex items-center space-x-4">
+            <Link href="/" className="flex items-center space-x-2">
+              <div className="w-8 h-8 bg-primary rounded-lg flex items-center justify-center">
+                <span className="text-primary-foreground font-bold">OV</span>
+              </div>
+              <span className="text-xl font-bold">OpenVote</span>
+            </Link>
+            <nav className="hidden md:flex items-center space-x-6 text-sm font-medium">
+              <Link href="/communities" className="text-muted-foreground hover:text-foreground transition-colors">
+                Communities
+              </Link>
+              <Link href="/governance-explorer" className="text-muted-foreground hover:text-foreground transition-colors">
+                Explorer
+              </Link>
+              <Link href="/chat" className="text-muted-foreground hover:text-foreground transition-colors">
+                Chat
+              </Link>
+              <DropdownMenu>
+                <DropdownMenuTrigger asChild>
+                  <Button variant="ghost" className="text-sm font-medium text-muted-foreground hover:text-foreground px-0">
+                    Create
+                  </Button>
+                </DropdownMenuTrigger>
+                <DropdownMenuContent>
+                  <DropdownMenuItem asChild>
+                    <Link href="/create-proposal">Create Proposal</Link>
+                  </DropdownMenuItem>
+                  <DropdownMenuItem asChild>
+                    <Link href="/create-vote">Create Vote</Link>
+                  </DropdownMenuItem>
+                </DropdownMenuContent>
+              </DropdownMenu>
+            </nav>
+          </div>
+          <div className="flex items-center space-x-2">
+            <NotificationBell />
+            <ThemeToggle />
+            <UserNav />
+          </div>
+        </div>
+      </header>
+      <main className="flex-1">
+        {children}
+      </main>
+      <footer className="border-t py-6 px-4">
+        <div className="container mx-auto text-center text-sm text-muted-foreground">
+          <p>&copy; 2024 OpenVote. All rights reserved.</p>
+        </div>
+      </footer>
     </div>
   )
 }

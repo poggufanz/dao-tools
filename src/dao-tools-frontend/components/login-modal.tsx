@@ -203,7 +203,7 @@ export function LoginModal({ isOpen, onClose }: LoginModalProps) {
 
 // Success state component
 interface UserProfileProps {
-    onClose: () => void;
+  onClose: () => void;
 }
 
 export function UserProfile({ onClose }: UserProfileProps) {
