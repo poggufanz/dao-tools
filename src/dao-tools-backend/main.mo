@@ -80,7 +80,10 @@ persistent actor DaoToolsBackend {
 
   // ─── Methods ────────────────────────────────────────────────────
 
-  public shared (msg) func createCommunity(name: Text, description: Text) : async Community {
+  public shared (msg) func createCommunity(name: Text, description: Text) : async Result.Result<Community, Text> {
+    if (name == "") {
+      return #err("Community name cannot be empty.");
+    };
     let caller = msg.caller;
     let cid    = nextCommunityId;
     let newComm : Community = {
@@ -92,7 +95,7 @@ persistent actor DaoToolsBackend {
     };
     communities.put(cid, newComm);
     nextCommunityId += 1;
-    newComm
+    #ok(newComm)
   };
 
   public query func getCommunity(id: CommunityId) : async ?Community {
