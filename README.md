@@ -14,7 +14,7 @@
 - ✅ Sybil-resistance: email, IP, device, whitelist
 - ✅ On-chain voting logic using ICP Canisters
 - ✅ Decentralized file storage via IPFS
-- ✅ Clean & modern UI with Mokoto + Tailwind
+- ✅ Clean & modern UI with Motoko + Tailwind
 
 ---
 
@@ -28,7 +28,7 @@ OpenVote helps organizations of all kinds — from decentralized DAOs to local c
 
 ## 🛠 Tech Stack
 
-- **Frontend:** Next.js, TailwindCSS, Mokoto
+- **Frontend:** Next.js, TailwindCSS, Motoko
 - **Smart Contracts:** Internet Computer Canisters
 - **Storage:** IPFS
 - **Wallet/Auth:** WalletConnect, Google OAuth
