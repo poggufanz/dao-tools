@@ -123,11 +123,32 @@ export default function CreateCommunityPage() {
 
     setIsSubmitting(true);
     try {
+      // Construct the payload with all necessary data
+      const communityPayload = {
+        name: formData.name,
+        tagline: formData.tagline,
+        description: formData.description,
+        category: formData.category,
+        logo: [], // Placeholder for logo upload logic
+        banner: [], // Placeholder for banner upload logic
+        isPrivate: formData.isPrivate,
+        requireApproval: formData.requireApproval,
+        // DFINITY doesn't directly support NFT gating from the frontend like this
+        // This would typically be a backend canister-to-canister interaction.
+        // We'll pass a simplified version for now.
+        nftGating: {
+          enabled: formData.enableNFTGating,
+          contract: formData.nftContract,
+        },
+        voting: {
+          method: formData.votingMethod,
+          minTokens: BigInt(formData.minimumTokens || 0),
+        },
+        channels: formData.channels,
+      };
+
       // @ts-ignore
-      const result = await actor.createCommunity(
-        formData.name,
-        formData.description
-      );
+      const result = await actor.createCommunity(communityPayload);
 
       // Handle potential errors returned from the canister
       if ('err' in result) {
