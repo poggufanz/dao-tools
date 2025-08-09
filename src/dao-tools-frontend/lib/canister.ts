@@ -1,7 +1,7 @@
 // frontend/src/lib/dfx.ts
 import { Actor, HttpAgent, Identity } from "@dfinity/agent";
 import { Principal } from "@dfinity/principal";
-import { idlFactory } from "../../declarations/dao-tools-backend";
+import { idlFactory } from "@declarations/dao-tools-backend";
 
 // 1. Pull in the env var and assert it’s present.
 //    You can either keep it as a raw string or convert to a Principal.
