@@ -41,6 +41,14 @@ import {
   Loader2,
 } from "lucide-react";
 
+type Community = {
+  id: bigint;
+  name: string;
+  description: string;
+};
+
+type Result<T, E> = { ok: T; err?: undefined } | { ok?: undefined; err: E };
+
 export default function CreateCommunityPage() {
   const [formData, setFormData] = useState({
     name: "",
@@ -121,55 +129,45 @@ export default function CreateCommunityPage() {
       return;
     }
 
+    if (!formData.name.trim()) {
+      toast({
+        title: "Error",
+        description: "Community name cannot be empty.",
+        variant: "destructive",
+      });
+      return;
+    }
+
     setIsSubmitting(true);
     try {
-      // Construct the payload with all necessary data
-      const communityPayload = {
-        name: formData.name,
-        tagline: formData.tagline,
-        description: formData.description,
-        category: formData.category,
-        logo: [], // Placeholder for logo upload logic
-        banner: [], // Placeholder for banner upload logic
-        isPrivate: formData.isPrivate,
-        requireApproval: formData.requireApproval,
-        // DFINITY doesn't directly support NFT gating from the frontend like this
-        // This would typically be a backend canister-to-canister interaction.
-        // We'll pass a simplified version for now.
-        nftGating: {
-          enabled: formData.enableNFTGating,
-          contract: formData.nftContract,
-        },
-        voting: {
-          method: formData.votingMethod,
-          minTokens: BigInt(formData.minimumTokens || 0),
-        },
-        channels: formData.channels,
-      };
+      const result: Result<Community, string> = await actor.createCommunity(
+        formData.name,
+        formData.description
+      );
 
-      // @ts-ignore
-      const result = await actor.createCommunity(communityPayload);
-
-      // Handle potential errors returned from the canister
-      if ('err' in result) {
-        throw new Error(Object.keys(result.err).join(', '));
+      if (result.ok) {
+        const newCommunityId = result.ok.id.toString();
+        toast({
+          title: "Success!",
+          description: `Community "${formData.name}" has been created.`,
+          action: (
+            <Button asChild>
+              <Link href={`/community/${newCommunityId}`}>View Community</Link>
+            </Button>
+          ),
+        });
+        router.push(`/community/${newCommunityId}`);
+      } else if (result.err) {
+        toast({
+          title: "Error Creating Community",
+          description: result.err,
+          variant: "destructive",
+        });
       }
-
-      const newCommunityId = result.ok.id.toString();
-
-      toast({
-        title: "Success!",
-        description: `Community "${formData.name}" has been created.`,
-        action: (
-          <Button asChild>
-            <Link href={`/community/${newCommunityId}`}>View Community</Link>
-          </Button>
-        ),
-      });
-      router.push(`/community/${newCommunityId}`);
     } catch (error) {
       console.error("Failed to create community:", error);
-      const errorMessage = error instanceof Error ? error.message : "An unknown error occurred.";
+      const errorMessage =
+        error instanceof Error ? error.message : "An unknown error occurred.";
       toast({
         title: "Error Creating Community",
         description: `Failed to create community: ${errorMessage}. Please check the console for more details and try again.`,
