@@ -6,6 +6,7 @@ import Nat        "mo:base/Nat";
 import Result     "mo:base/Result";
 import Array      "mo:base/Array";
 import Buffer     "mo:base/Buffer";
+import Blob       "mo:base/Blob";
 
 persistent actor DaoToolsBackend {
   // ─── Type Definitions ───────────────────────────────────────────
@@ -13,12 +14,45 @@ persistent actor DaoToolsBackend {
   type CommunityId    = Nat;
   type ProposalId     = Nat;
 
+  type NFTGating = {
+    enabled  : Bool;
+    contract : Text;
+  };
+
+  type Voting = {
+    method    : Text;
+    minTokens : Nat;
+  };
+
+  type CommunityInit = {
+    name            : Text;
+    tagline         : Text;
+    description     : Text;
+    category        : Text;
+    logo            : Blob;
+    banner          : Blob;
+    isPrivate       : Bool;
+    requireApproval : Bool;
+    nftGating       : NFTGating;
+    voting          : Voting;
+    channels        : [Text];
+  };
+
   type Community = {
-    id          : CommunityId;
-    name        : Text;
-    description : Text;
-    owner       : Principal;
-    members     : [Principal];
+    id              : CommunityId;
+    name            : Text;
+    tagline         : Text;
+    description     : Text;
+    category        : Text;
+    logo            : Blob;
+    banner          : Blob;
+    isPrivate       : Bool;
+    requireApproval : Bool;
+    nftGating       : NFTGating;
+    voting          : Voting;
+    channels        : [Text];
+    owner           : Principal;
+    members         : [Principal];
   };
 
   type VoteOption     = { #Yes; #No };
@@ -80,18 +114,27 @@ persistent actor DaoToolsBackend {
 
   // ─── Methods ────────────────────────────────────────────────────
 
-  public shared (msg) func createCommunity(name: Text, description: Text) : async Result.Result<Community, Text> {
-    if (name == "") {
+  public shared (msg) func createCommunity(payload: CommunityInit) : async Result.Result<Community, Text> {
+    if (payload.name == "") {
       return #err("Community name cannot be empty.");
     };
     let caller = msg.caller;
     let cid    = nextCommunityId;
     let newComm : Community = {
-      id          = cid;
-      name        = name;
-      description = description;
-      owner       = caller;
-      members     = [caller];
+      id              = cid;
+      name            = payload.name;
+      tagline         = payload.tagline;
+      description     = payload.description;
+      category        = payload.category;
+      logo            = payload.logo;
+      banner          = payload.banner;
+      isPrivate       = payload.isPrivate;
+      requireApproval : payload.requireApproval;
+      nftGating       = payload.nftGating;
+      voting          = payload.voting;
+      channels        = payload.channels;
+      owner           = caller;
+      members         = [caller];
     };
     communities.put(cid, newComm);
     nextCommunityId += 1;
