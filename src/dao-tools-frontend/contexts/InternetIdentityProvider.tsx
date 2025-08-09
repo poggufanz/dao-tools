@@ -2,10 +2,12 @@
 
 import React, { createContext, useContext, useState, useEffect, ReactNode } from 'react';
 import { AuthClient } from '@dfinity/auth-client';
-import { Actor, ActorSubclass, HttpAgent, Identity } from '@dfinity/agent';
+import { ActorSubclass, Identity } from '@dfinity/agent';
+import { createActor } from '@/lib/canister';
 
 interface InternetIdentityContextType {
   identity: Identity | null;
+  actor: ActorSubclass | null;
   isAuthenticated: boolean;
   login: () => Promise<void>;
   logout: () => Promise<void>;
@@ -28,6 +30,7 @@ interface InternetIdentityProviderProps {
 export const InternetIdentityProvider = ({ children }: InternetIdentityProviderProps) => {
   const [authClient, setAuthClient] = useState<AuthClient | null>(null);
   const [identity, setIdentity] = useState<Identity | null>(null);
+  const [actor, setActor] = useState<ActorSubclass | null>(null);
   const [isAuthenticated, setIsAuthenticated] = useState(false);
 
   useEffect(() => {
@@ -37,6 +40,7 @@ export const InternetIdentityProvider = ({ children }: InternetIdentityProviderP
       if (isAuthenticated) {
         const identity = client.getIdentity();
         setIdentity(identity);
+        setActor(createActor(identity));
         setIsAuthenticated(true);
       }
     });
@@ -51,6 +55,7 @@ export const InternetIdentityProvider = ({ children }: InternetIdentityProviderP
             onSuccess: () => {
                 const identity = authClient.getIdentity();
                 setIdentity(identity);
+                setActor(createActor(identity));
                 setIsAuthenticated(true);
                 resolve();
             },
@@ -63,11 +68,12 @@ export const InternetIdentityProvider = ({ children }: InternetIdentityProviderP
     if (!authClient) return;
     await authClient.logout();
     setIdentity(null);
+    setActor(null);
     setIsAuthenticated(false);
   };
 
   return (
-    <InternetIdentityContext.Provider value={{ identity, isAuthenticated, login, logout }}>
+    <InternetIdentityContext.Provider value={{ identity, actor, isAuthenticated, login, logout }}>
       {children}
     </InternetIdentityContext.Provider>
   );
